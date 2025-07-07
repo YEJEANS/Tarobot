@@ -1,5 +1,4 @@
 
-
 import streamlit as st
 import openai
 import os
@@ -64,7 +63,15 @@ else:
                 )
                 image_url = response.data[0].url
             except Exception as e:
-                st.error(f"이미지 생성 오류: {e}")
+                err_msg = str(e)
+                if "429" in err_msg:
+                    st.error("이미지 생성 API 사용량 제한(429)에 도달했습니다. 잠시 후 다시 시도하거나, OpenAI 계정의 사용량/결제 상태를 확인하세요.")
+                elif "401" in err_msg or "invalid_api_key" in err_msg:
+                    st.error("API Key가 올바르지 않거나 권한이 없습니다. 유효한 OpenAI API Key를 사용하세요.")
+                elif "400" in err_msg and "size" in err_msg:
+                    st.error("이미지 크기 파라미터가 잘못되었습니다. 지원되는 크기(1024x1024, 1024x1792, 1792x1024)만 사용하세요.")
+                else:
+                    st.error(f"이미지 생성 오류: {e}")
                 image_url = None
             images.append(image_url)
 
